@@ -1,15 +1,14 @@
 [[sql-component]]
-== SQL Component
+== SQL コンポーネント 
+TODO 表記ゆれの統一 Component or コンポーネント
 
 *Camel version 1.4から利用可能*
 
-*sql:*コンポーネントによりJDBCクエリを使ってデータベースを操作する事ができる.このコンポーネントと<<jdbc-component,JDBC>>コンポーネントの違いは, SQLコンポーネントはエンドポイントのプロパティとしてSQLを指定することと, クエリにわたすパラメータをメッセージのペイロードに指定することである.
+*sql:*コンポーネントによりJDBCクエリを使ってデータベースを操作する事ができる.このコンポーネントと<<jdbc-component,JDBC>>コンポーネントの違いには次のようなものがある.(SQLコンポーネントはエンドポイントのプロパティとしてSQLを指定できること, クエリにわたすパラメータをメッセージのペイロードに指定できること)
 
 このコンポーネントは実際のSQLの操作のために`spring-jdbc`を内部で使用している.
 
-Maven users will need to add the following dependency to their `pom.xml`
-for this component:
-Mavenユーザーはこのコンポーネントを使用するために, pom.xml内に以下の依存関係を追加する必要がある.
+Mavenユーザーはこのコンポーネントを使用するために, `pom.xml`内に以下の依存関係を追加する必要がある.
 
 [source,xml]
 ----
@@ -21,67 +20,57 @@ Mavenユーザーはこのコンポーネントを使用するために, pom.xml
 </dependency>
 ----
 
-The SQL component also supports:
+SQLコンポーネントは以下の機能をサポートする:
 
-* a JDBC based repository for the
-Idempotent Consumer EIP pattern. See
-further below.
-* a JDBC based repository for the Aggregator EIP
-pattern. See further below.
+* JDBCをベースリポジトリとしたIdempotent Consumer EIP パターン(詳細は以下を参照)
+* JDBCをベースリポジトリとしたAggregator EIP パターン(詳細は以下を参照)
 
 === URI format
 
-WARNING:From Camel 2.11 onwards this component can create both consumer (e.g.
-`from()`) and producer endpoints (e.g. `to()`).
-In previous versions, it could only act as a producer.
+警告:Camel2.11以降SQLコンポーネントはコンシューマーエンドポイントも(`from()`)プロデューサーエンドポイントも(`to()`)作成する事ができる.2.11より前のバージョンではプロデューサーとしてしか利用できない.
 
-INFO:This component can be used as a
-http://camel.apache.org/transactional-client.html[Transactional Client].
+インフォ:SQLコンポーネントはhttp://camel.apache.org/transactional-client.html[Transactional Client]として使用する.
 
-The SQL component uses the following endpoint URI notation:
+
+SQLコンポーネントのエンドポイントの書式は以下のように記述する.
 
 [source,text]
 ----
 sql:select * from table where id=# order by name[?options]
 ----
 
-From Camel 2.11 onwards you can use named parameters by using
-:`#name_of_the_parameter` style as shown:
+Camel2.11以降のバージョンでは#`パラメータ名`という形式で名前付きパラメータを使用することができる.
 
 [source,text]
 ----
 sql:select * from table where id=:#myId order by name[?options]
 ----
 
-When using named parameters, Camel will lookup the names from, in the
-given precedence: +
- 1. from message body if its a `java.util.Map` +
- 2. from message headers
+Camelは名前付きパラメータの値を以下の順序で検索する
+ 1. `java.util.Map`形式のメッセージボディ
+ 2. メッセージヘッダー
+ 
 
-If a named parameter cannot be resolved, then an exception is thrown.
+名前付きパラメータを見つけることができなかった場合は、Camelは例外を発生させる.
 
-From *Camel 2.14* onward you can use Simple expressions as parameters as
-shown:
+*Camel2.14*以降ではシンプル式を利用することができる: TODO シンプル式は通じないかも?
 
 [source,text]
 ----
 sql:select * from table where id=:#${property.myId} order by name[?options]
 ----
 
-Notice that the standard `?` symbol that denotes the parameters to an
-SQL query is substituted with the `pass:[#]` symbol, because the `?` symbol is
-used to specify options for the endpoint. The `?` symbol replacement can
-be configured on endpoint basis.
+#TODO ここの翻訳が問題ないか要確認
+`?`はエンドポイントに対するオプションの指定で使用されるため,通常SQLクエリ内のパラメータを示す`?`は,`pass:[#]`で表現する.`?`の置き換えはエンドポイント単位で行われる.
 
-From *Camel 2.17* onwards you can externalize your SQL queries to files
-in the classpath or file system as shown:
+*Camel 2.17*以降はSQLクエリをクラスパスもしくはファイルシステム上に外出しすることができる.
 
 [source,text]
 ----
 sql:classpath:sql/myquery.sql[?options]
 ----
 
-And the myquery.sql file is in the classpath and is just a plain text
+以下はクラスパス上に配置されたSQLファイル(myquery.sql)の記載例である.
 
 [source,sql]
 ----
@@ -94,27 +83,25 @@ order by
   name
 ----
 
-In the file you can use multilines and format the SQL as you wish. And
-also use comments such as the – dash line.
+SQLはエンドポイント上に直接指定するときとは異なって、行をまたいで記述してもよい.また--でコメントを記載することもできる.
 
-You can append query options to the URI in the following format,
+以下のフォーマットでURIに対してオプションを指定することができる.
 `?option=value&option=value&...`
 
-=== Options
+=== オプション
 
 
 
 // component options: START
-The SQL component supports 3 options, which are listed below.
-
+SQLコンポーネントは以下3つのオプションを指定できる.
 
 
 [width="100%",cols="2,5,^1,2",options="header"]
 |===
-| Name | Description | Default | Type
-| *dataSource* (common) | Sets the DataSource to use to communicate with the database. |  | DataSource
-| *usePlaceholder* (advanced) | Sets whether to use placeholder and replace all placeholder characters with sign in the SQL queries. This option is default true | true | boolean
-| *resolveProperty Placeholders* (advanced) | Whether the component should resolve property placeholders on itself when starting. Only properties which are of String type can use property placeholders. | true | boolean
+| オプション名 | 説明 | デフォルト値 | 型
+| *dataSource* (共通) | データベースへ接続する際に使用するデータソースオブジェクトを指定する. |  | DataSource
+| *usePlaceholder* (アドバンスト) | SQL内に記載されたプロパティプレースホルダーを全て置き換えるかどうかを指定する.. このオプションのデフォルト値はtrue. | true | boolean
+| *resolveProperty Placeholders* (アドバンスト) | SQLコンポーネントが起動したときにプロパティプレースホルダーを置換するかどうかを指定する. ただし,値が文字列型のプレースホルダーのみ使用できる. | true | boolean
 |===
 // component options: END
 
