@@ -109,30 +109,30 @@ SQLコンポーネントは以下3つのオプションを指定できる.
 
 
 // endpoint options: START
-The SQL endpoint is configured using URI syntax:
+SQLエンドポイントはURI形式で記述する:
 
 ----
 sql:query
 ----
 
-with the following path and query parameters:
+SQLエンドポイントはパスパラメータと複数のクエリパラメータで構成される:
 
-==== Path Parameters (1 parameters):
-
-
-[width="100%",cols="2,5,^1,2",options="header"]
-|===
-| Name | Description | Default | Type
-| *query* | *Required* Sets the SQL query to perform. You can externalize the query by using file: or classpath: as prefix and specify the location of the file. |  | String
-|===
-
-
-==== Query Parameters (45 parameters):
+==== パス パラメータ (1 パラメータ):
 
 
 [width="100%",cols="2,5,^1,2",options="header"]
 |===
-| Name | Description | Default | Type
+| パラメータ名 | 説明 | デフォルト値 | 型
+| *query* | *必須* 実行したいSQLクエリを指定する. プレフィックス(file: もしくは classpath:)とパスを指定することで,SQLクエリをファイルとして外出しすることができる. |  | String
+|===
+
+
+==== クエリ パラメータ (45 パラメータ):
+
+
+[width="100%",cols="2,5,^1,2",options="header"]
+|===
+| パラメータ名 | 説明 | デフォルト値 | 型
 | *allowNamedParameters* (common) | Whether to allow using named parameters in the queries. | true | boolean
 | *dataSource* (common) | Sets the DataSource to use to communicate with the database. |  | DataSource
 | *dataSourceRef* (common) | *Deprecated* Sets the reference to a DataSource to lookup from the registry, to use for communicating with the database. |  | String
